@@ -72,12 +72,12 @@
  */
 
 #ifdef _SYSTEMCONFIGURATION_H
-typedef enum {
+typedef NS_ENUM(NSInteger, AFNetworkReachabilityStatus) {
     AFNetworkReachabilityStatusUnknown          = -1,
     AFNetworkReachabilityStatusNotReachable     = 0,
     AFNetworkReachabilityStatusReachableViaWWAN = 1,
     AFNetworkReachabilityStatusReachableViaWiFi = 2,
-} AFNetworkReachabilityStatus;
+};
 #else
 #warning "SystemConfiguration framework not found in project, or not included in precompiled header. Network reachability functionality will not be available."
 #endif
@@ -86,11 +86,11 @@ typedef enum {
 #warning "CoreServices framework not found in project, or not included in precompiled header. Automatic MIME type detection when uploading files in multipart requests will not be available."
 #endif
 
-typedef enum {
+typedef NS_ENUM(NSInteger, AFHTTPClientParameterEncoding) {
     AFFormURLParameterEncoding,
     AFJSONParameterEncoding,
     AFPropertyListParameterEncoding,
-} AFHTTPClientParameterEncoding;
+};
 
 @class AFHTTPRequestOperation;
 @protocol AFMultipartFormData;
@@ -239,10 +239,10 @@ typedef enum {
 /**
  Creates an `NSMutableURLRequest` object with the specified HTTP method and path.
  
- If the HTTP method is `GET`, the parameters will be used to construct a url-encoded query string that is appended to the request's URL. Otherwise, the parameters will be encoded according to the value of the `parameterEncoding` property, and set as the request body.
+ If the HTTP method is `GET`, `HEAD`, or `DELETE`, the parameters will be used to construct a url-encoded query string that is appended to the request's URL. Otherwise, the parameters will be encoded according to the value of the `parameterEncoding` property, and set as the request body.
  
- @param method The HTTP method for the request, such as `GET`, `POST`, `PUT`, or `DELETE`.
- @param path The path to be appended to the HTTP client's base URL and used as the request URL.
+ @param method The HTTP method for the request, such as `GET`, `POST`, `PUT`, or `DELETE`. This parameter must not be `nil`.
+ @param path The path to be appended to the HTTP client's base URL and used as the request URL. If `nil`, no path will be appended to the base URL.
  @param parameters The parameters to be either set as a query string for `GET` requests, or the request HTTP body.
   
  @return An `NSMutableURLRequest` object 
@@ -254,15 +254,13 @@ typedef enum {
 /**
  Creates an `NSMutableURLRequest` object with the specified HTTP method and path, and constructs a `multipart/form-data` HTTP body, using the specified parameters and multipart form data block. See http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.2
  
- @param method The HTTP method for the request. Must be either `POST`, `PUT`, or `DELETE`.
+ @param method The HTTP method for the request. This parameter must not be `GET` or `HEAD`, or `nil`.
  @param path The path to be appended to the HTTP client's base URL and used as the request URL.
  @param parameters The parameters to be encoded and set in the request HTTP body.
  @param block A block that takes a single argument and appends data to the HTTP body. The block argument is an object adopting the `AFMultipartFormData` protocol. This can be used to upload files, encode HTTP body as JSON or XML, or specify multiple values for the same parameter, as one might for array values.
   
  @discussion Multipart form requests are automatically streamed, reading files directly from disk along with in-memory data in a single HTTP body. The resulting `NSMutableURLRequest` object has an `HTTPBodyStream` property, so refrain from setting `HTTPBodyStream` or `HTTPBody` on this request object, as it will clear out the multipart form body stream.
- 
- @warning An exception will be raised if the specified method is not `POST`, `PUT` or `DELETE`.
- 
+  
  @return An `NSMutableURLRequest` object
  */
 - (NSMutableURLRequest *)multipartFormRequestWithMethod:(NSString *)method
@@ -302,7 +300,9 @@ typedef enum {
  Cancels all operations in the HTTP client's operation queue whose URLs match the specified HTTP method and path.
  
  @param method The HTTP method to match for the cancelled requests, such as `GET`, `POST`, `PUT`, or `DELETE`. If `nil`, all request operations with URLs matching the path will be cancelled. 
- @param path The path to match for the cancelled requests.
+ @param path The path appended to the HTTP client base URL to match against the cancelled requests. If `nil`, no path will be appended to the base URL.
+ 
+ @discussion This method only cancels `AFHTTPRequestOperations` whose request URL matches the HTTP client base URL with the path appended. For complete control over the lifecycle of enqueued operations, you can access the `operationQueue` property directly, which allows you to, for instance, cancel operations filtered by a predicate, or simply use `-cancelAllRequests`. Note that the operation queue may include non-HTTP operations, so be sure to check the type before attempting to directly introspect an operation's `request` property.
  */
 - (void)cancelAllHTTPOperationsWithMethod:(NSString *)method path:(NSString *)path;
 

@@ -90,13 +90,12 @@ static NSString * AFPercentEscapedQueryStringPairMemberFromStringWithEncoding(NS
 #pragma mark -
 
 @interface AFQueryStringPair : NSObject
-@property (readwrite, nonatomic, retain) id field;
-@property (readwrite, nonatomic, retain) id value;
+@property (readwrite, nonatomic, strong) id field;
+@property (readwrite, nonatomic, strong) id value;
 
 - (id)initWithField:(id)field value:(id)value;
 
 - (NSString *)URLEncodedStringValueWithEncoding:(NSStringEncoding)stringEncoding;
-
 @end
 
 @implementation AFQueryStringPair
@@ -185,12 +184,10 @@ static NSString * AFPropertyListStringFromParameters(NSDictionary *parameters) {
 }
 
 @interface AFStreamingMultipartFormData : NSObject <AFMultipartFormData>
-
 - (id)initWithURLRequest:(NSMutableURLRequest *)request
           stringEncoding:(NSStringEncoding)encoding;
 
 - (NSMutableURLRequest *)requestByFinalizingMultipartFormData;
-
 @end
 
 #pragma mark -
@@ -423,6 +420,12 @@ static void AFNetworkReachabilityReleaseCallback(const void *info) {}
                                       path:(NSString *)path
                                 parameters:(NSDictionary *)parameters
 {
+    NSCParameterAssert(method);
+    
+    if (!path) {
+        path = @"";
+    }
+    
     NSURL *url = [NSURL URLWithString:path relativeToURL:self.baseURL];
 	NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setHTTPMethod:method];
@@ -459,6 +462,9 @@ static void AFNetworkReachabilityReleaseCallback(const void *info) {}
                                              parameters:(NSDictionary *)parameters
                               constructingBodyWithBlock:(void (^)(id <AFMultipartFormData> formData))block
 {
+    NSCParameterAssert(method);
+    NSCParameterAssert(![method isEqualToString:@"GET"] && ![method isEqualToString:@"HEAD"]);
+    
     NSMutableURLRequest *request = [self requestWithMethod:method path:path parameters:nil];
 
     __block AFStreamingMultipartFormData *formData = [[AFStreamingMultipartFormData alloc] initWithURLRequest:request stringEncoding:self.stringEncoding];
@@ -516,13 +522,20 @@ static void AFNetworkReachabilityReleaseCallback(const void *info) {}
     [self.operationQueue addOperation:operation];
 }
 
-- (void)cancelAllHTTPOperationsWithMethod:(NSString *)method path:(NSString *)path {
+- (void)cancelAllHTTPOperationsWithMethod:(NSString *)method
+                                     path:(NSString *)path
+{    
+    NSString *URLStringToMatched = [[[self requestWithMethod:(method ?: @"GET") path:path parameters:nil] URL] absoluteString];
+    
     for (NSOperation *operation in [self.operationQueue operations]) {
         if (![operation isKindOfClass:[AFHTTPRequestOperation class]]) {
             continue;
         }
         
-        if ((!method || [method isEqualToString:[[(AFHTTPRequestOperation *)operation request] HTTPMethod]]) && [path isEqualToString:[[[(AFHTTPRequestOperation *)operation request] URL] path]]) {
+        BOOL hasMatchingMethod = !method || [method isEqualToString:[[(AFHTTPRequestOperation *)operation request] HTTPMethod]];
+        BOOL hasMatchingURL = [[[[(AFHTTPRequestOperation *)operation request] URL] absoluteString] isEqualToString:URLStringToMatched];
+        
+        if (hasMatchingMethod && hasMatchingURL) {
             [operation cancel];
         }
     }
@@ -717,10 +730,9 @@ NSUInteger const kAFUploadStream3GSuggestedPacketSize = 1024 * 16;
 NSTimeInterval const kAFUploadStream3GSuggestedDelay = 0.2;
 
 @interface AFHTTPBodyPart : NSObject
-
 @property (nonatomic, assign) NSStringEncoding stringEncoding;
-@property (nonatomic, retain) NSDictionary *headers;
-@property (nonatomic, retain) NSInputStream *inputStream;
+@property (nonatomic, strong) NSDictionary *headers;
+@property (nonatomic, strong) NSInputStream *inputStream;
 @property (nonatomic, assign) unsigned long long bodyContentLength;
 
 @property (nonatomic, assign) BOOL hasInitialBoundary;
@@ -730,11 +742,9 @@ NSTimeInterval const kAFUploadStream3GSuggestedDelay = 0.2;
 @property (readonly) unsigned long long contentLength;
 
 - (NSInteger)read:(uint8_t *)buffer maxLength:(NSUInteger)length;
-
 @end
 
 @interface AFMultipartBodyStream : NSInputStream <NSStreamDelegate>
-
 @property (nonatomic, assign) NSUInteger numberOfBytesInPacket;
 @property (nonatomic, assign) NSTimeInterval delay;
 @property (readonly) unsigned long long contentLength;
@@ -743,14 +753,13 @@ NSTimeInterval const kAFUploadStream3GSuggestedDelay = 0.2;
 - (id)initWithStringEncoding:(NSStringEncoding)encoding;
 - (void)setInitialAndFinalBoundaries;
 - (void)appendHTTPBodyPart:(AFHTTPBodyPart *)bodyPart;
-
 @end
 
 #pragma mark -
 
 @interface AFStreamingMultipartFormData ()
 @property (readwrite, nonatomic, copy) NSMutableURLRequest *request;
-@property (readwrite, nonatomic, retain) AFMultipartBodyStream *bodyStream;
+@property (readwrite, nonatomic, strong) AFMultipartBodyStream *bodyStream;
 @property (readwrite, nonatomic, assign) NSStringEncoding stringEncoding;
 @end
 
@@ -881,12 +890,12 @@ NSTimeInterval const kAFUploadStream3GSuggestedDelay = 0.2;
 
 @interface AFMultipartBodyStream ()
 @property (nonatomic, assign) NSStreamStatus streamStatus;
-@property (nonatomic, retain) NSError *streamError;
+@property (nonatomic, strong) NSError *streamError;
 
 @property (nonatomic, assign) NSStringEncoding stringEncoding;
-@property (nonatomic, retain) NSMutableArray *HTTPBodyParts;
-@property (nonatomic, retain) NSEnumerator *HTTPBodyPartEnumerator;
-@property (nonatomic, retain) AFHTTPBodyPart *currentHTTPBodyPart;
+@property (nonatomic, strong) NSMutableArray *HTTPBodyParts;
+@property (nonatomic, strong) NSEnumerator *HTTPBodyPartEnumerator;
+@property (nonatomic, strong) AFHTTPBodyPart *currentHTTPBodyPart;
 @end
 
 @implementation AFMultipartBodyStream
@@ -1027,12 +1036,12 @@ NSTimeInterval const kAFUploadStream3GSuggestedDelay = 0.2;
 
 #pragma mark -
 
-typedef enum {
+typedef NS_ENUM(NSInteger, AFHTTPBodyPartReadPhase) {
     AFEncapsulationBoundaryPhase = 1,
     AFHeaderPhase                = 2,
     AFBodyPhase                  = 3,
     AFFinalBoundaryPhase         = 4,
-} AFHTTPBodyPartReadPhase;
+};
 
 @interface AFHTTPBodyPart () {
     AFHTTPBodyPartReadPhase _phase;
@@ -1040,7 +1049,6 @@ typedef enum {
 }
 
 - (BOOL)transitionToNextPhase;
-
 @end
 
 @implementation AFHTTPBodyPart
