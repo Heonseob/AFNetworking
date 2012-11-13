@@ -21,8 +21,9 @@
 // THE SOFTWARE.
 
 #import "AFURLConnectionOperation.h"
+
 #if __IPHONE_OS_VERSION_MIN_REQUIRED
-#import <UIKit/UIKit.h>
+    #import <UIKit/UIKit.h>
 #endif
 
 #if !__has_feature(objc_arc)
@@ -602,7 +603,7 @@ didReceiveResponse:(NSURLResponse *)response
         return nil;
     }
 
-    self.state = [aDecoder decodeIntegerForKey:@"state"];
+    self.state = (AFOperationState)[aDecoder decodeIntegerForKey:@"state"];
     self.cancelled = [aDecoder decodeBoolForKey:@"isCancelled"];
     self.response = [aDecoder decodeObjectForKey:@"response"];
     self.error = [aDecoder decodeObjectForKey:@"error"];

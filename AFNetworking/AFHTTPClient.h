@@ -22,6 +22,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import <Availability.h>
+
 /**
  `AFHTTPClient` captures the common patterns of communicating with an web application over HTTP. It encapsulates information like base URL, authorization credentials, and HTTP headers, and uses them to construct and manage the execution of HTTP request operations.
  
@@ -43,7 +45,6 @@
  
  By default, `AFHTTPClient` sets the following HTTP headers:
  
- - `Accept-Encoding: gzip`
  - `Accept-Language: (comma-delimited preferred languages), en-us;q=0.8`
  - `User-Agent: (generated user agent)`
  
@@ -79,11 +80,15 @@ typedef enum {
     AFNetworkReachabilityStatusReachableViaWiFi = 2,
 } AFNetworkReachabilityStatus;
 #else
-#warning "SystemConfiguration framework not found in project, or not included in precompiled header. Network reachability functionality will not be available."
+    #warning SystemConfiguration framework not found in project, or not included in precompiled header. Network reachability functionality will not be available.
 #endif
 
 #ifndef __UTTYPE__
-#warning "CoreServices framework not found in project, or not included in precompiled header. Automatic MIME type detection when uploading files in multipart requests will not be available."
+    #if __IPHONE_OS_VERSION_MIN_REQUIRED
+        #warning MobileCoreServices framework not found in project, or not included in precompiled header. Automatic MIME type detection when uploading files in multipart requests will not be available.
+    #else
+        #warning CoreServices framework not found in project, or not included in precompiled header. Automatic MIME type detection when uploading files in multipart requests will not be available.
+    #endif
 #endif
 
 typedef enum {

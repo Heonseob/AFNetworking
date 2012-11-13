@@ -28,15 +28,15 @@
 #import <Availability.h>
 
 #ifdef _SYSTEMCONFIGURATION_H
-#import <netinet/in.h>
-#import <netinet6/in6.h>
-#import <arpa/inet.h>
-#import <ifaddrs.h>
-#import <netdb.h>
+    #import <netinet/in.h>
+    #import <netinet6/in6.h>
+    #import <arpa/inet.h>
+    #import <ifaddrs.h>
+    #import <netdb.h>
 #endif
 
 #if __IPHONE_OS_VERSION_MIN_REQUIRED
-#import <UIKit/UIKit.h>
+    #import <UIKit/UIKit.h>
 #endif
 
 #ifdef _SYSTEMCONFIGURATION_H
@@ -116,9 +116,9 @@ static NSString * AFPercentEscapedQueryStringPairMemberFromStringWithEncoding(NS
 
 - (NSString *)URLEncodedStringValueWithEncoding:(NSStringEncoding)stringEncoding {
     if (!self.value || [self.value isEqual:[NSNull null]]) {
-        return AFPercentEscapedQueryStringPairMemberFromStringWithEncoding(self.field, stringEncoding);
+        return AFPercentEscapedQueryStringPairMemberFromStringWithEncoding([self.field description], stringEncoding);
     } else {
-        return [NSString stringWithFormat:@"%@=%@", AFPercentEscapedQueryStringPairMemberFromStringWithEncoding(self.field, stringEncoding), AFPercentEscapedQueryStringPairMemberFromStringWithEncoding([self.value description], stringEncoding)];
+        return [NSString stringWithFormat:@"%@=%@", AFPercentEscapedQueryStringPairMemberFromStringWithEncoding([self.field description], stringEncoding), AFPercentEscapedQueryStringPairMemberFromStringWithEncoding([self.value description], stringEncoding)];
     }
 }
 
@@ -590,9 +590,8 @@ static void AFNetworkReachabilityReleaseCallback(const void *info) {}
         
         dispatch_group_enter(dispatchGroup);
         [batchedOperation addDependency:operation];
-        
-        [self enqueueHTTPRequestOperation:operation];
     }
+    [self.operationQueue addOperations:operations waitUntilFinished:NO];
     [self.operationQueue addOperation:batchedOperation];
 }
 
@@ -658,8 +657,8 @@ static void AFNetworkReachabilityReleaseCallback(const void *info) {}
         return nil;
     }
     
-    self.stringEncoding = [aDecoder decodeIntegerForKey:@"stringEncoding"];
-    self.parameterEncoding = [aDecoder decodeIntegerForKey:@"parameterEncoding"];
+    self.stringEncoding = (NSStringEncoding)[aDecoder decodeIntegerForKey:@"stringEncoding"];
+    self.parameterEncoding = (AFHTTPClientParameterEncoding)[aDecoder decodeIntegerForKey:@"parameterEncoding"];
     self.registeredHTTPOperationClassNames = [aDecoder decodeObjectForKey:@"registeredHTTPOperationClassNames"];
     self.defaultHeaders = [aDecoder decodeObjectForKey:@"defaultHeaders"];
     
