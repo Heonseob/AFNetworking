@@ -114,10 +114,15 @@
 
 /**
  The string representation of the response data.
- 
- @discussion This method uses the string encoding of the response, or if UTF-8 if not specified, to construct a string from the response data.
  */
 @property (readonly, nonatomic, copy) NSString *responseString;
+
+/**
+ The string encoding of the response.
+ 
+ @discussion If the response does not specify a valid string encoding, `responseStringEncoding` will return `NSUTF8StringEncoding`. 
+ */
+@property (readonly, nonatomic, assign) NSStringEncoding responseStringEncoding;
 
 ///------------------------
 /// @name Accessing Streams
@@ -184,7 +189,7 @@
  
  @param handler A handler to be called shortly before the application’s remaining background time reaches 0. The handler is wrapped in a block that cancels the operation, and cleans up and marks the end of execution, unlike the `handler` parameter in `UIApplication -beginBackgroundTaskWithExpirationHandler:`, which expects this to be done in the handler itself. The handler is called synchronously on the main thread, thus blocking the application’s suspension momentarily while the application is notified. 
  */
-#if __IPHONE_OS_VERSION_MIN_REQUIRED
+#if defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
 - (void)setShouldExecuteAsBackgroundTaskWithExpirationHandler:(void (^)(void))handler;
 #endif
 
