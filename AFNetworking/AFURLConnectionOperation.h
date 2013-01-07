@@ -45,6 +45,8 @@
  - `connection:willCacheResponse:`
  - `connection:canAuthenticateAgainstProtectionSpace:`
  - `connection:didReceiveAuthenticationChallenge:`
+ - `connectionShouldUseCredentialStorage:`
+ - `connection:needNewBodyStream:`
  
  If any of these methods are overridden in a subclass, they _must_ call the `super` implementation first.
   
@@ -123,6 +125,25 @@
  @discussion If the response does not specify a valid string encoding, `responseStringEncoding` will return `NSUTF8StringEncoding`. 
  */
 @property (readonly, nonatomic, assign) NSStringEncoding responseStringEncoding;
+
+
+///-------------------------------
+/// @name Managing URL Credentials
+///-------------------------------
+
+/**
+ Whether the URL connection should consult the credential storage for authenticating the connection. `YES` by default.
+ 
+ @discussion This is the value that is returned in the `NSURLConnectionDelegate` method `-connectionShouldUseCredentialStorage:`.
+ */
+@property (nonatomic, assign) BOOL shouldUseCredentialStorage;
+
+/**
+ The credential used for authentication challenges in `-connection:didReceiveAuthenticationChallenge:`.
+ 
+ @discussion This will be overridden by any shared credentials that exist for the username or password of the request URL, if present.
+ */
+@property (nonatomic, strong) NSURLCredential *credential;
 
 ///------------------------
 /// @name Accessing Streams
