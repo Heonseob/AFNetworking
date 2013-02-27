@@ -276,6 +276,11 @@ NSArray * AFQueryStringPairsFromKeyAndValue(NSString *key, id value) {
     return [NSString stringWithFormat:@"<%@: %p, baseURL: %@, defaultHeaders: %@, registeredOperationClasses: %@, operationQueue: %@>", NSStringFromClass([self class]), self, [self.baseURL absoluteString], self.defaultHeaders, self.registeredHTTPOperationClassNames, self.operationQueue];
 }
 
+- (void)changeBaseURLScheme:(NSString *)scheme {
+    NSString *newBaseURLString = [NSString stringWithFormat:@"%@://%@", scheme, self.baseURL.host];
+    self.baseURL = [NSURL URLWithString:newBaseURLString];
+}
+
 #pragma mark -
 
 #ifdef _SYSTEMCONFIGURATION_H

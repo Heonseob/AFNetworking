@@ -161,6 +161,13 @@ typedef enum {
  */
 - (id)initWithBaseURL:(NSURL *)url;
 
+/**
+ Change baseURL's scheme
+
+ @param scheme new scheme
+ */
+- (void)changeBaseURLScheme:(NSString *)scheme;
+
 ///-----------------------------------
 /// @name Managing Reachability Status
 ///-----------------------------------
