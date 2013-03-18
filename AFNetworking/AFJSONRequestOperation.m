@@ -107,6 +107,9 @@ static dispatch_queue_t json_request_operation_processing_queue() {
 - (void)setCompletionBlockWithSuccess:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
                               failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure
 {
+    self.successBlock = success;
+    self.failureBlock = failure;
+    
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-retain-cycles"
     self.completionBlock = ^ {

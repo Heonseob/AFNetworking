@@ -50,7 +50,7 @@
  Options for reading the response JSON data and creating the Foundation objects. For possible values, see the `NSJSONSerialization` documentation section "NSJSONReadingOptions".
  */
 @property (nonatomic, assign) NSJSONReadingOptions JSONReadingOptions;
- 
+
 ///----------------------------------
 /// @name Creating Request Operations
 ///----------------------------------

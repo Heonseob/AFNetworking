@@ -61,6 +61,18 @@
  */
 @property (nonatomic, assign) dispatch_queue_t failureCallbackQueue;
 
+/**
+ success block
+ */
+typedef void (^AFHTTPSuccessBlockType)(AFHTTPRequestOperation *operation, id responseObject);
+@property (nonatomic, copy) AFHTTPSuccessBlockType successBlock;
+
+/**
+ failure block
+ */
+typedef void (^AFHTTPFailureBlockType)(AFHTTPRequestOperation *operation, NSError *error);
+@property (nonatomic, copy) AFHTTPFailureBlockType failureBlock;
+
 ///------------------------------------------------------------
 /// @name Managing Acceptable HTTP Status Codes & Content Types
 ///------------------------------------------------------------
