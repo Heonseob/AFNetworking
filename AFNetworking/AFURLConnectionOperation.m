@@ -138,6 +138,7 @@ static inline BOOL AFStateTransitionIsValid(AFOperationState fromState, AFOperat
 @synthesize request = _request;
 @synthesize response = _response;
 @synthesize error = _error;
+@synthesize allowsInvalidSSLCertificate = _allowsInvalidSSLCertificate;
 @synthesize responseData = _responseData;
 @synthesize responseString = _responseString;
 @synthesize responseStringEncoding = _responseStringEncoding;
@@ -702,9 +703,11 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     if ([request.HTTPBodyStream conformsToProtocol:@protocol(NSCopying)]) {
         return [request.HTTPBodyStream copy];
+    } else {
+        [self cancelConnection];
+        
+        return nil;
     }
-    
-    return nil;
 }
 
 - (NSURLRequest *)connection:(NSURLConnection *)connection
