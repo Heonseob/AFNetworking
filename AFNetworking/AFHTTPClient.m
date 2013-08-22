@@ -1300,11 +1300,9 @@ typedef enum {
     }
 
     if (_phase == AFBodyPhase) {
-        if ([self.inputStream hasBytesAvailable]) {
-            bytesRead += [self.inputStream read:&buffer[bytesRead] maxLength:(length - (NSUInteger)bytesRead)];
-        }
+        bytesRead += [self.inputStream read:&buffer[bytesRead] maxLength:(length - (NSUInteger)bytesRead)];
 
-        if (![self.inputStream hasBytesAvailable]) {
+        if ([self.inputStream streamStatus] >= NSStreamStatusAtEnd) {
             [self transitionToNextPhase];
         }
     }
