@@ -510,7 +510,7 @@ static BOOL AFSecKeyIsEqualToKey(SecKeyRef key1, SecKeyRef key2) {
 
 - (void)operationDidStart {
     [self.lock lock];
-    if (! [self isCancelled]) {
+    if (![self isCancelled]) {
         self.connection = [[NSURLConnection alloc] initWithRequest:self.request delegate:self startImmediately:NO];
         
         NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
@@ -533,6 +533,7 @@ static BOOL AFSecKeyIsEqualToKey(SecKeyRef key1, SecKeyRef key2) {
             userInfo = [NSDictionary dictionaryWithObject:[self.request URL] forKey:NSURLErrorFailingURLErrorKey];
         }
         self.error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:userInfo];
+
         [self finish];
     }
 }
@@ -564,13 +565,11 @@ static BOOL AFSecKeyIsEqualToKey(SecKeyRef key1, SecKeyRef key2) {
     if ([self.request URL]) {
         userInfo = [NSDictionary dictionaryWithObject:[self.request URL] forKey:NSURLErrorFailingURLErrorKey];
     }
-    self.error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:userInfo];
+    NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:userInfo];
     
-    if (self.connection) {
+    if (![self isFinished] && self.connection) {
         [self.connection cancel];
-        
-        // Manually send this delegate message since `[self.connection cancel]` causes the connection to never send another message to its delegate
-        [self performSelector:@selector(connection:didFailWithError:) withObject:self.connection withObject:self.error];
+        [self performSelector:@selector(connection:didFailWithError:) withObject:self.connection withObject:error];
     }
 }
 
@@ -686,18 +685,6 @@ willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challe
     return self.shouldUseCredentialStorage;
 }
 
-- (NSInputStream *)connection:(NSURLConnection __unused *)connection
-            needNewBodyStream:(NSURLRequest *)request
-{
-    if ([request.HTTPBodyStream conformsToProtocol:@protocol(NSCopying)]) {
-        return [request.HTTPBodyStream copy];
-    } else {
-        [self cancelConnection];
-        
-        return nil;
-    }
-}
-
 - (NSURLRequest *)connection:(NSURLConnection *)connection
              willSendRequest:(NSURLRequest *)request
             redirectResponse:(NSURLResponse *)redirectResponse
@@ -733,9 +720,25 @@ didReceiveResponse:(NSURLResponse *)response
     didReceiveData:(NSData *)data
 {
     NSUInteger length = [data length];
-    if ([self.outputStream hasSpaceAvailable]) {
-        const uint8_t *dataBuffer = (uint8_t *) [data bytes];
-        [self.outputStream write:&dataBuffer[0] maxLength:length];
+    while (YES) {
+        NSUInteger totalNumberOfBytesWritten = 0;
+        if ([self.outputStream hasSpaceAvailable]) {
+            const uint8_t *dataBuffer = (uint8_t *)[data bytes];
+
+            NSInteger numberOfBytesWritten = 0;
+            while (totalNumberOfBytesWritten < length) {
+                numberOfBytesWritten = [self.outputStream write:&dataBuffer[0] maxLength:length];
+                if (numberOfBytesWritten == -1) {
+                    [self.connection cancel];
+                    [self performSelector:@selector(connection:didFailWithError:) withObject:self.connection withObject:self.outputStream.streamError];
+                    return;
+                } else {
+                    totalNumberOfBytesWritten += numberOfBytesWritten;
+                }
+            }
+
+            break;
+        }
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{
