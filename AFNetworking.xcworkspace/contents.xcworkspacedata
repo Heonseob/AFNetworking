@@ -136,11 +136,15 @@
       <FileRef
          location = "group:UIRefreshControl+AFNetworking.m">
       </FileRef>
+   </Group>
+   <Group
+      location = "container:"
+      name = "AppKit+AFNetworking">
       <FileRef
-         location = "group:NSImageView+AFNetworking.h">
+         location = "group:AppKit+AFNetworking/NSImageView+AFNetworking.h">
       </FileRef>
       <FileRef
-         location = "group:NSImageView+AFNetworking.m">
+         location = "group:AppKit+AFNetworking/NSImageView+AFNetworking.m">
       </FileRef>
    </Group>
    <FileRef
