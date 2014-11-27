@@ -223,6 +223,7 @@
  - `image/x-bmp`
  - `image/x-xbitmap`
  - `image/x-win-bitmap`
+ - `application/jpg`
  */
 @interface AFImageResponseSerializer : AFHTTPResponseSerializer
 
