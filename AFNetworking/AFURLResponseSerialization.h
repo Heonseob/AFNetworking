@@ -223,6 +223,7 @@
 
  - `image/tiff`
  - `image/jpeg`
+ - `image/jpg`
  - `image/gif`
  - `image/png`
  - `image/ico`
@@ -232,6 +233,7 @@
  - `image/x-xbitmap`
  - `image/x-win-bitmap`
  - `application/jpg`
+ - `application/png`
  */
 @interface AFImageResponseSerializer : AFHTTPResponseSerializer
 
