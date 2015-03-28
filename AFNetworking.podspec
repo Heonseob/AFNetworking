@@ -3,9 +3,10 @@ Pod::Spec.new do |s|
   s.version  = '2.5.2'
   s.license  = 'MIT'
   s.summary  = 'A delightful iOS and OS X networking framework.'
-  s.homepage = 'https://github.com/AFNetworking/AFNetworking'
+  s.homepage = 'https://github.com/minorblend/AFNetworking'
   s.social_media_url = 'https://twitter.com/AFNetworking'
-  s.authors  = { 'Mattt Thompson' => 'm@mattt.me' }
+  s.authors  = { 'Mattt Thompson' => 'm@mattt.me', 
+                 'Josh Chung' => 'minorblend@gmail.com' }
   s.source   = { :git => 'https://github.com/minorblend/AFNetworking.git', :tag => s.version, :submodules => true }
   s.requires_arc = true
 
