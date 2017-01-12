@@ -6,7 +6,8 @@ Pod::Spec.new do |s|
   s.homepage = 'https://github.com/minorblend/AFNetworking'
   s.social_media_url = 'https://twitter.com/AFNetworking'
   s.authors  = { 'Mattt Thompson' => 'm@mattt.me', 
-                 'Josh Chung' => 'minorblend@gmail.com' }
+                 'Josh Chung' => 'minorblend@gmail.com',
+                 'Chase Stone' => 'chase.stone@kakaocorp.com' }
   s.source   = { :git => 'https://github.com/minorblend/AFNetworking.git', :tag => s.version, :submodules => true }
   s.requires_arc = true
 
@@ -59,14 +60,4 @@ Pod::Spec.new do |s|
     ss.osx.source_files = ''
   end
 
-  s.subspec 'AppKit' do |ss|
-    ss.osx.deployment_target = '10.8'
-
-    ss.dependency 'AFNetworking/NSURLConnection'
-    ss.dependency 'AFNetworking/NSURLSession'
-
-    ss.osx.public_header_files = 'AppKit+AFNetworking/*.h'
-    ss.ios.source_files = ''
-    ss.osx.source_files = 'AppKit+AFNetworking'
-  end
 end
